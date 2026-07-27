@@ -40,7 +40,7 @@ export function LockedLink({ url, title, className }: LockedLinkProps) {
     }
   };
 
-  const lockedStyles = "bg-[#2d4a22] text-[#81c784] border border-[#388e3c]/30";
+  const lockedStyles = "bg-[#2d4a22] text-white border border-[#388e3c]/30";
   const unlockedStyles = "bg-[#00c853] hover:bg-[#00e676] text-white shadow-lg shadow-[#00c853]/20";
   const currentStyles = isLocked ? lockedStyles : unlockedStyles;
 
@@ -64,7 +64,7 @@ export function LockedLink({ url, title, className }: LockedLinkProps) {
       {isLocked ? <Lock className="w-4 h-4 opacity-70" /> : <ExternalLink className="w-4 h-4" />}
       {title}
       {isLocked && (
-        <span className="ml-2 px-2 py-0.5 text-xs bg-[#1b5e20] text-[#a5d6a7] rounded-md font-bold shadow-inner">
+        <span className="ml-2 px-2 py-0.5 text-xs bg-[#1b5e20] text-white rounded-md font-bold shadow-inner">
           {timeLeft}s
         </span>
       )}

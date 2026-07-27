@@ -208,13 +208,13 @@ export function PostDetails() {
               </div>
             )}
 
-            <div className="prose prose-invert max-w-none mb-10">
+            <div className="w-full max-w-full overflow-hidden mb-10">
               <p className="text-lg font-medium text-white/90 mb-6 leading-relaxed">
                 {post.description}
               </p>
               
               <div 
-                className="text-white/70 leading-relaxed"
+                className="article-content text-white/80 leading-relaxed text-sm sm:text-[15px] font-normal"
                 dangerouslySetInnerHTML={{ __html: post.content || '' }}
               />
             </div>

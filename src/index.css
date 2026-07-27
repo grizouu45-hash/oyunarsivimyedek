@@ -62,3 +62,102 @@
     z-index: 50;
   }
 }
+
+  
+@layer components {
+  .article-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .article-content * {
+    max-width: 100%;
+  }
+
+  .article-content p, 
+  .article-content span, 
+  .article-content div,
+  .article-content h1,
+  .article-content h2,
+  .article-content h3,
+  .article-content h4,
+  .article-content h5,
+  .article-content h6,
+  .article-content a,
+  .article-content strong,
+  .article-content b,
+  .article-content em,
+  .article-content i {
+    white-space: normal !important; 
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .article-content p {
+    margin-bottom: 1rem;
+  }
+  .article-content h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: white;
+  }
+  .article-content h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: white;
+  }
+  .article-content h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: white;
+  }
+  .article-content ul {
+    list-style-type: disc;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .article-content ol {
+    list-style-type: decimal;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .article-content li {
+    margin-bottom: 0.25rem;
+  }
+  .article-content a {
+    color: #a855f7;
+  }
+  .article-content a:hover {
+    text-decoration: underline;
+  }
+  .article-content img {
+    border-radius: 0.75rem;
+    max-width: 100%;
+    height: auto;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  .article-content iframe {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.75rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  .article-content strong, .article-content b {
+    color: white;
+    font-weight: bold;
+  }
+}
