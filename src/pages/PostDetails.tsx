@@ -18,16 +18,20 @@ export function PostDetails() {
   const [hoverRating, setHoverRating] = useState<number>(0);
 
   const handleRate = async (rating: number) => {
-    if (!auth.currentUser) {
-      alert("Lütfen puan vermek için giriş yapın.");
-      return;
+    let uid = auth.currentUser?.uid;
+    if (!uid) {
+      uid = localStorage.getItem('anon_uid');
+      if (!uid) {
+        uid = 'anon_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('anon_uid', uid);
+      }
     }
     setUserRating(rating);
     try {
       await updateDoc(doc(db, "games", id!), {
-        [`ratings.${auth.currentUser.uid}`]: rating
+        [`ratings.${uid}`]: rating
       });
-      setPost(prev => prev ? { ...prev, ratings: { ...prev.ratings, [auth.currentUser!.uid]: rating } } : null);
+      setPost(prev => prev ? { ...prev, ratings: { ...prev.ratings, [uid]: rating } } : null);
     } catch (e) {
       console.error("Error updating rating:", e);
     }
@@ -52,8 +56,14 @@ export function PostDetails() {
   };
 
   useEffect(() => {
-    if (post?.ratings && auth.currentUser) {
-      setUserRating(post.ratings[auth.currentUser.uid] || 0);
+    if (post?.ratings) {
+      let uid = auth.currentUser?.uid;
+      if (!uid) {
+        uid = localStorage.getItem('anon_uid');
+      }
+      if (uid) {
+        setUserRating(post.ratings[uid] || 0);
+      }
     }
   }, [post]);
 
@@ -235,35 +245,42 @@ export function PostDetails() {
             
             {/* Rating Section */}
             <div className="mb-10 p-6 bg-[#1A0B2E] rounded-2xl border border-white/10 flex flex-col items-center justify-center text-center">
-              <h3 className="text-lg font-semibold text-white mb-2">Bu haberi değerlendir</h3>
-              <div className="flex items-center gap-2 mb-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    onClick={() => handleRate(star)}
-                    className="p-1 focus:outline-none transition-transform hover:scale-110"
-                  >
-                    <Star 
-                      className={`w-8 h-8 ${
-                        (hoverRating || userRating) >= star 
-                          ? 'fill-yellow-400 text-yellow-400' 
-                          : 'text-white/20'
-                      }`} 
-                    />
-                  </button>
-                ))}
-              </div>
-              <p className="text-sm text-white/60">
-                {userRating > 0 ? `Puanınız: ${userRating} yıldız` : 'Puan vermek için yıldızlara tıklayın'}
+              <h3 className="text-lg font-semibold text-white mb-4">Bu haberi değerlendir</h3>
+              <div className="flex flex-col md:flex-row items-center gap-4 mb-2">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => handleRate(star)}
+                      className="p-1 focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star 
+                        className={`w-8 h-8 ${
+                          (hoverRating || userRating) >= star 
+                            ? 'fill-yellow-400 text-yellow-400' 
+                            : 'text-white/20'
+                        }`} 
+                      />
+                    </button>
+                  ))}
+                </div>
                 {post?.ratings && Object.keys(post.ratings).length > 0 && (
-                  <span className="ml-2 pl-2 border-l border-white/20">
-                    Ortalama: {((Object.values(post.ratings) as number[]).reduce((a, b) => Number(a) + Number(b), 0) / Object.values(post.ratings).length).toFixed(1)} 
-                    ({Object.values(post.ratings).length} oy)
-                  </span>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+                    <span className="text-xl font-bold text-yellow-400">
+                      {((Object.values(post.ratings) as number[]).reduce((a, b) => Number(a) + Number(b), 0) / Object.values(post.ratings).length).toFixed(1)}
+                    </span>
+                    <div className="flex flex-col items-start text-xs text-white/50">
+                      <span>Ortalama</span>
+                      <span>{Object.values(post.ratings).length} Oy</span>
+                    </div>
+                  </div>
                 )}
+              </div>
+              <p className="text-sm text-white/50 mt-2">
+                {userRating > 0 ? `Puanınız: ${userRating} yıldız` : 'Puan vermek için yıldızlara tıklayın'}
               </p>
             </div>
 

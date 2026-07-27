@@ -111,13 +111,13 @@ export function Header({ onSearch, rightContent }: { onSearch?: (query: string) 
           )}
           
           <div className="hidden sm:flex items-center gap-1 sm:gap-2 mr-1 sm:mr-2">
-            <a href="https://instagram.com/aveniragames" target="_blank" rel="noopener noreferrer" className="p-2 text-white/60 hover:bg-[#2D164B] hover:text-white rounded-full transition-colors">
+            <a href="https://instagram.com/aveniragames" target="_blank" rel="noopener noreferrer" className="p-2 text-[#c084fc] hover:bg-[#2D164B] hover:text-[#e9d5ff] rounded-full transition-colors">
               <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
             </a>
-            <a href="https://www.youtube.com/@AVENIRAGAMES" target="_blank" rel="noopener noreferrer" className="p-2 text-white/60 hover:bg-[#2D164B] hover:text-white rounded-full transition-colors">
+            <a href="https://www.youtube.com/@AVENIRAGAMES" target="_blank" rel="noopener noreferrer" className="p-2 text-[#c084fc] hover:bg-[#2D164B] hover:text-[#e9d5ff] rounded-full transition-colors">
               <Youtube className="w-4 h-4 sm:w-5 sm:h-5" />
             </a>
-            <a href="https://www.tiktok.com/@avenira.games" target="_blank" rel="noopener noreferrer" className="p-2 text-white/60 hover:bg-[#2D164B] hover:text-white rounded-full transition-colors">
+            <a href="https://www.tiktok.com/@avenira.games" target="_blank" rel="noopener noreferrer" className="p-2 text-[#c084fc] hover:bg-[#2D164B] hover:text-[#e9d5ff] rounded-full transition-colors">
               <TiktokIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </a>
           </div>
@@ -220,13 +220,13 @@ export function Header({ onSearch, rightContent }: { onSearch?: (query: string) 
             <Link to="/iletisim" onClick={() => setIsMenuOpen(false)} className="px-4 py-3 text-sm font-medium text-white/80 hover:bg-[#2D164B]">İletişim</Link>
             
             <div className="px-4 py-3 mt-2 border-t border-white/10 flex items-center justify-center gap-4">
-              <a href="https://instagram.com/aveniragames" target="_blank" rel="noopener noreferrer" className="p-2 text-white/70 hover:bg-[#2D164B] hover:text-white rounded-full transition-colors">
+              <a href="https://instagram.com/aveniragames" target="_blank" rel="noopener noreferrer" className="p-2 text-[#c084fc] hover:bg-[#2D164B] hover:text-[#e9d5ff] rounded-full transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="https://www.youtube.com/@AVENIRAGAMES" target="_blank" rel="noopener noreferrer" className="p-2 text-white/70 hover:bg-[#2D164B] hover:text-white rounded-full transition-colors">
+              <a href="https://www.youtube.com/@AVENIRAGAMES" target="_blank" rel="noopener noreferrer" className="p-2 text-[#c084fc] hover:bg-[#2D164B] hover:text-[#e9d5ff] rounded-full transition-colors">
                 <Youtube className="w-5 h-5" />
               </a>
-              <a href="https://www.tiktok.com/@avenira.games" target="_blank" rel="noopener noreferrer" className="p-2 text-white/70 hover:bg-[#2D164B] hover:text-white rounded-full transition-colors">
+              <a href="https://www.tiktok.com/@avenira.games" target="_blank" rel="noopener noreferrer" className="p-2 text-[#c084fc] hover:bg-[#2D164B] hover:text-[#e9d5ff] rounded-full transition-colors">
                 <TiktokIcon className="w-5 h-5" />
               </a>
             </div>
