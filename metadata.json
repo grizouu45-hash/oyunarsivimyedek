@@ -1,0 +1,6 @@
+{
+  "name": "OYUNARŞİVİM.com",
+  "description": "A very simple and elegant app store for games with admin panel and dark mode.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
