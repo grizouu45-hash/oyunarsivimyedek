@@ -687,7 +687,7 @@ export function StoreFront() {
       </main>
 
       <footer className="px-4 md:px-8 py-6 bg-transparent text-[10px] md:text-xs text-white/50 flex flex-col md:flex-row justify-between items-center gap-4 uppercase tracking-widest border-t border-white/10 mt-12 z-10 relative">
-        <span>© 2026 AVENIRAGAMES</span>
+        <span>© 2026 OYUNARŞİVİM.com</span>
         <div className="flex space-x-4 md:space-x-6">
           <Link
             to="/hizmet-sartlari"
