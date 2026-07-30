@@ -29,6 +29,14 @@ export function StoreFront() {
   const [activeQuestion, setActiveQuestion] = useState<WeeklyQuestion | null>(
     null,
   );
+
+  useEffect(() => {
+    document.title = 'OYUNARŞİVİM.com | Mobil Futbol Arşivim';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Mobil futbol oyunları ile ilgili güncel mod ve yamaları ücretsiz olarak sitemizden indirebilirsiniz!');
+    }
+  }, []);
   const [activeGiveaway, setActiveGiveaway] = useState<Giveaway | null>(null);
   const [giveawayAnswer, setGiveawayAnswer] = useState("");
   const [searchQuery, setSearchQuery] = useState("");

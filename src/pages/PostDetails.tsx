@@ -17,6 +17,18 @@ export function PostDetails() {
   const [userRating, setUserRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
 
+  useEffect(() => {
+    if (post) {
+      document.title = `${post.title} | OYUNARŞİVİM.com`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', post.description || 'Mobil futbol oyunları ile ilgili güncel mod ve yamaları ücretsiz olarak sitemizden indirebilirsiniz!');
+      }
+    } else {
+      document.title = 'OYUNARŞİVİM.com | Mobil Futbol Arşivim';
+    }
+  }, [post]);
+
   const handleRate = async (rating: number) => {
     let uid = auth.currentUser?.uid;
     if (!uid) {
