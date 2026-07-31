@@ -78,8 +78,7 @@ export function Profile() {
       });
       
       alert('Profiliniz başarıyla güncellendi!');
-      
-      setUser({ ...user, displayName, photoURL: selectedPhoto } as any);
+      window.location.reload();
       
     } catch (error: any) {
       console.error("Error updating profile:", error);
