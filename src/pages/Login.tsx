@@ -23,13 +23,20 @@ export function Login() {
       if (result.user) {
         try {
           const userRef = doc(db, 'users', result.user.uid);
-          await setDoc(userRef, {
+          
+          const userData: any = {
             uid: result.user.uid,
             email: result.user.email,
             displayName: result.user.displayName,
             photoURL: result.user.photoURL,
             lastLoginAt: serverTimestamp()
-          }, { merge: true });
+          };
+
+          if (result.user.metadata.creationTime) {
+             userData.createdAt = new Date(result.user.metadata.creationTime);
+          }
+
+          await setDoc(userRef, userData, { merge: true });
         } catch (e) {
           console.error('Error saving user to firestore:', e);
         }

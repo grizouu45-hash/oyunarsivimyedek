@@ -17,18 +17,6 @@ export function PostDetails() {
   const [userRating, setUserRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
 
-  useEffect(() => {
-    if (post) {
-      document.title = `${post.title} | OYUNARŞİVİM.com`;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', post.description || 'Mobil futbol oyunları ile ilgili güncel mod ve yamaları ücretsiz olarak sitemizden indirebilirsiniz!');
-      }
-    } else {
-      document.title = 'OYUNARŞİVİM.com | Mobil Futbol Arşivim';
-    }
-  }, [post]);
-
   const handleRate = async (rating: number) => {
     let uid = auth.currentUser?.uid;
     if (!uid) {
@@ -111,6 +99,7 @@ export function PostDetails() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0F051D] transition-colors duration-300 relative text-white">
+        <title>Yükleniyor... | OYUNARŞİVİM.com</title>
         <Header />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
@@ -122,6 +111,7 @@ export function PostDetails() {
   if (!post || post.status === 'trash') {
     return (
       <div className="min-h-screen bg-[#0F051D] transition-colors duration-300 relative text-white">
+        <title>Bulunamadı | OYUNARŞİVİM.com</title>
         <Header />
         <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
           <h2 className="text-2xl font-bold text-white mb-4">Haber Bulunamadı</h2>
@@ -134,8 +124,21 @@ export function PostDetails() {
     );
   }
 
+  const defaultDesc = 'Mobil futbol oyunları ile ilgili güncel mod ve yamaları ücretsiz olarak sitemizden indirebilirsiniz!';
+
   return (
     <div className="min-h-screen bg-[#0F051D] transition-colors duration-300 relative text-white">
+      <title>{post.title} | OYUNARŞİVİM.com</title>
+      <meta name="description" content={post.description || defaultDesc} />
+      <meta property="og:title" content={`${post.title} | OYUNARŞİVİM.com`} />
+      <meta property="og:description" content={post.description || defaultDesc} />
+      {post.imageUrl && <meta property="og:image" content={post.imageUrl} />}
+      <meta property="og:type" content="article" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={`${post.title} | OYUNARŞİVİM.com`} />
+      <meta name="twitter:description" content={post.description || defaultDesc} />
+      {post.imageUrl && <meta name="twitter:image" content={post.imageUrl} />}
+      
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
       <div className="absolute top-1/2 -left-24 w-80 h-80 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
       <Header />

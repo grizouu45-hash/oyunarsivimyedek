@@ -718,11 +718,24 @@ export function AdminPanel() {
         });
         alert("Değişiklikler başarıyla kaydedildi!");
       } else {
-        await addDoc(collection(db, "games"), {
+        const newDoc = await addDoc(collection(db, "games"), {
           ...submitData,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
+        
+        // Add global notification
+        await addDoc(collection(db, "notifications"), {
+          userId: 'all',
+          postId: newDoc.id,
+          type: 'post',
+          senderName: 'OYUNARŞİVİM.com',
+          senderPhoto: '/favicon.png', // Or some system icon
+          text: `Yeni bir yama eklendi: "${submitData.title}"`,
+          read: false,
+          createdAt: serverTimestamp()
+        });
+        
         alert("Haber başarıyla eklendi!");
       }
       setIsModalOpen(false);

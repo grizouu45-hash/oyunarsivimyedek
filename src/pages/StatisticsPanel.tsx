@@ -7,17 +7,53 @@ import { ShieldAlert, Users, MousePointerClick, MessageSquare, ArrowLeft } from 
 import { Link, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { AdminCommentsModal } from '../components/AdminCommentsModal';
+import { AdminUsersModal } from '../components/AdminUsersModal';
 
 export function StatisticsPanel() {
   const [weeklyVisits, setWeeklyVisits] = useState(0);
   const [dailyVisits, setDailyVisits] = useState(0);
   const [monthlyVisits, setMonthlyVisits] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [showUsersModal, setShowUsersModal] = useState(false);
   const [topGames, setTopGames] = useState<any[]>([]);
   const [totalComments, setTotalComments] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showCommentsModal, setShowCommentsModal] = useState(false);
+
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [customRangeVisits, setCustomRangeVisits] = useState<number | null>(null);
+  const [loadingCustom, setLoadingCustom] = useState(false);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const calculateCustomRange = async () => {
+      if (!startDate || !endDate) return;
+      setLoadingCustom(true);
+      try {
+        let total = 0;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dayStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+          const dailyRef = doc(db, 'site_stats', `daily_${dayStr}`);
+          const dailyDoc = await getDoc(dailyRef);
+          if (dailyDoc.exists()) {
+            total += (dailyDoc.data().visits || 0);
+          }
+        }
+        setCustomRangeVisits(total);
+      } catch (error) {
+        console.error("Custom range error", error);
+      } finally {
+        setLoadingCustom(false);
+      }
+    };
+    calculateCustomRange();
+  }, [startDate, endDate]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -74,6 +110,12 @@ export function StatisticsPanel() {
         const usersRef = collection(db, 'users');
         const usersSnapshot = await getDocs(usersRef);
         setTotalUsers(usersSnapshot.size || 0);
+        
+        const usersData = usersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setUsersList(usersData);
       } catch(e) { console.error('Users error', e) }
 
       try {
@@ -170,7 +212,10 @@ export function StatisticsPanel() {
                 </div>
               </div>
 
-              <div className="bg-[#1A0B2E] backdrop-blur p-6 rounded-2xl border border-white/10 shadow-sm flex items-center gap-4">
+              <div 
+                onClick={() => setShowUsersModal(true)}
+                className="bg-[#1A0B2E] backdrop-blur p-6 rounded-2xl border border-white/10 shadow-sm flex items-center gap-4 cursor-pointer hover:border-white/20 transition-colors"
+              >
                 <div className="p-4 bg-orange-500/10 text-orange-400 rounded-xl">
                   <Users className="w-8 h-8" />
                 </div>
@@ -204,6 +249,39 @@ export function StatisticsPanel() {
                   <p className="text-3xl font-bold text-white">{totalComments}</p>
                 </div>
               </div>
+
+              {/* 7th Block: Custom Date Range */}
+              <div className="bg-[#1A0B2E] backdrop-blur p-6 rounded-2xl border border-white/10 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-4 bg-cyan-500/10 text-cyan-400 rounded-xl">
+                    <Users className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white/60">Özel Tarih Ziyaretçi</p>
+                    <p className="text-3xl font-bold text-white">
+                      {loadingCustom ? (
+                        <span className="inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                      ) : (customRangeVisits !== null ? customRangeVisits : '-')}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="date" 
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full bg-[#0F051D] border border-white/10 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 color-scheme-dark"
+                  />
+                  <span className="text-white/60">-</span>
+                  <input 
+                    type="date" 
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full bg-[#0F051D] border border-white/10 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 color-scheme-dark"
+                  />
+                </div>
+              </div>
+              
             </div>
 
             <div className="bg-[#1A0B2E] backdrop-blur border border-white/10 rounded-2xl shadow-sm overflow-hidden">
@@ -257,6 +335,11 @@ export function StatisticsPanel() {
       <AdminCommentsModal 
         isOpen={showCommentsModal} 
         onClose={() => setShowCommentsModal(false)} 
+      />
+      <AdminUsersModal
+        isOpen={showUsersModal}
+        onClose={() => setShowUsersModal(false)}
+        users={usersList}
       />
     </div>
   );

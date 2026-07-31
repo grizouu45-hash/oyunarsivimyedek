@@ -1,5 +1,5 @@
 import { ADMIN_EMAILS, hasAdminOrEditorAccess } from '../lib/utils';
-import { Search, Instagram, Youtube, Video, Menu, X as CloseIcon, LogOut, ShieldAlert, BarChart2 } from 'lucide-react';
+import { Search, Instagram, Youtube, Video, Menu, X as CloseIcon, LogOut, ShieldAlert, BarChart2, User as UserIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { auth } from '../lib/firebase';
@@ -133,7 +133,11 @@ export function Header({ onSearch, rightContent }: { onSearch?: (query: string) 
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
-                <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`} alt="Profile" className="w-8 h-8 rounded-full border border-purple-200 dark:border-purple-500/30" />
+                <img 
+                  src={(user.email && hasAdminOrEditorAccess(user)) ? 'https://img.magnific.com/premium-vector/technology-concept-vector-illustration-featuring-consulting-design-flat-style-elements_1226483-4088.jpg?semt=ais_hybrid&w=740&q=80' : (user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`)} 
+                  alt="Profile" 
+                  className="w-8 h-8 rounded-full border border-purple-200 dark:border-purple-500/30 object-cover" 
+                />
               </button>
               
               {showProfileMenu && (
@@ -145,6 +149,14 @@ export function Header({ onSearch, rightContent }: { onSearch?: (query: string) 
                       <p className="text-sm font-semibold text-white truncate">{user.email}</p>
                     </div>
                     
+                    <Link 
+                      to="/profil" 
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-white/80 hover:bg-[#2D164B]"
+                    >
+                      <UserIcon className="w-4 h-4" /> Profilim
+                    </Link>
+
                     {(hasAdminOrEditorAccess(user)) && (
                       <>
                         <Link 

@@ -16,20 +16,27 @@ export function NotificationsCenter({ user }: { user: User }) {
   const isAdmin = user.email ? hasAdminOrEditorAccess(user) : false;
 
   useEffect(() => {
-    // Listen for both direct user notifications and admin notifications if user is admin
-    const conditions = isAdmin ? ['in', [user.uid, 'admin']] : ['==', user.uid];
-    
-    // Using orderBy with 'in' requires composite index, so we omit orderBy and sort client-side
+    // Listen for user, admin, and global notifications
     const q = query(
       collection(db, 'notifications'),
-      where('userId', conditions[0] as any, conditions[1])
+      where('userId', 'in', isAdmin ? [user.uid, 'admin', 'all'] : [user.uid, 'all'])
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Notification[];
+      const readGlobal = JSON.parse(localStorage.getItem(`read_notifs_${user.uid}`) || '[]');
+      
+      const notifsData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        let isRead = data.read;
+        if (data.userId === 'all') {
+          isRead = readGlobal.includes(doc.id);
+        }
+        return {
+          id: doc.id,
+          ...data,
+          read: isRead
+        } as Notification;
+      });
       
       // Sort client-side
       notifsData.sort((a, b) => {
@@ -57,11 +64,21 @@ export function NotificationsCenter({ user }: { user: User }) {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = async (notificationId: string) => {
+  const markAsRead = async (notification: Notification) => {
+    if (!notification.id) return;
     try {
-      await updateDoc(doc(db, 'notifications', notificationId), {
-        read: true
-      });
+      if (notification.userId === 'all') {
+        const readGlobal = JSON.parse(localStorage.getItem(`read_notifs_${user.uid}`) || '[]');
+        if (!readGlobal.includes(notification.id)) {
+          readGlobal.push(notification.id);
+          localStorage.setItem(`read_notifs_${user.uid}`, JSON.stringify(readGlobal));
+          setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n));
+        }
+      } else {
+        await updateDoc(doc(db, 'notifications', notification.id), {
+          read: true
+        });
+      }
     } catch (error) {
       console.error('Error marking as read', error);
     }
@@ -70,15 +87,13 @@ export function NotificationsCenter({ user }: { user: User }) {
   const markAllAsRead = async () => {
     const unread = notifications.filter(n => !n.read);
     for (const notif of unread) {
-      if (notif.id) {
-        await markAsRead(notif.id);
-      }
+      await markAsRead(notif);
     }
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.read && notification.id) {
-      markAsRead(notification.id);
+    if (!notification.read) {
+      markAsRead(notification);
     }
     setIsOpen(false);
     navigate(`/post/${notification.postId}`);

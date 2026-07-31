@@ -13,15 +13,19 @@ import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { TermsOfService } from './pages/TermsOfService';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { PageTracker } from './components/PageTracker';
+import { Profile } from './pages/Profile';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <PageTracker />
       <Routes>
         <Route path="/" element={<StoreFront />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/admin/statistics" element={<StatisticsPanel />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/profil" element={<Profile />} />
         <Route path="/post/:id" element={<PostDetails />} />
         <Route path="/hakkinda" element={<About />} />
         <Route path="/iletisim" element={<Contact />} />
