@@ -24,10 +24,10 @@ export function StatisticsPanel() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [customRangeVisits, setCustomRangeVisits] = useState<number | null>(null);
-  const [avgTimeFilter, setAvgTimeFilter] = useState("today");
-  const [dailyAvgTime, setDailyAvgTime] = useState("0 dakika");
-  const [weeklyAvgTime, setWeeklyAvgTime] = useState("0 dakika");
-  const [monthlyAvgTime, setMonthlyAvgTime] = useState("0 dakika");
+  
+  
+  
+  
   const [loadingCustom, setLoadingCustom] = useState(false);
 
   const navigate = useNavigate();
@@ -112,32 +112,7 @@ export function StatisticsPanel() {
         }
       } catch(e) { console.error('Monthly error', e) }
 
-      // Average Time Spent (Daily, Weekly, Monthly)
-      try {
-        const getAvgMins = (data: any) => {
-          let secs = 0;
-          if (typeof data.averageSessionDuration === 'number') {
-            secs = Math.max(0, data.averageSessionDuration);
-          } else if (typeof data.totalDuration === 'number' && typeof data.totalSessions === 'number') {
-            secs = Math.floor(Math.max(0, data.totalDuration) / Math.max(1, data.totalSessions));
-          }
-          let m = Math.ceil(secs / 60);
-          if (m === 0 && secs > 0) m = 1; // if less than 60s but > 0
-          return `${m} dakika`;
-        };
-      
-        const dRef = doc(db, 'site_stats', `daily_${dayStr}`);
-        const dDoc = await getDoc(dRef);
-        if (dDoc.exists()) setDailyAvgTime(getAvgMins(dDoc.data()));
-        
-        const wRef = doc(db, 'site_stats', weekStr);
-        const wDoc = await getDoc(wRef);
-        if (wDoc.exists()) setWeeklyAvgTime(getAvgMins(wDoc.data()));
-        
-        const mRef = doc(db, 'site_stats', `monthly_${monthStr}`);
-        const mDoc = await getDoc(mRef);
-        if (mDoc.exists()) setMonthlyAvgTime(getAvgMins(mDoc.data()));
-      } catch (e) { console.error('Avg time error', e) }
+
 
 
 
@@ -288,32 +263,6 @@ export function StatisticsPanel() {
               </div>
 
               
-              <div className="bg-[#1A0B2E] backdrop-blur p-6 rounded-2xl border border-white/10 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 bg-rose-500/10 text-rose-400 rounded-xl">
-                      <Clock className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-white/60">Ortalama Kalma Süresi</p>
-                      <p className="text-3xl font-bold text-white">
-                        {avgTimeFilter === 'today' ? dailyAvgTime : avgTimeFilter === 'week' ? weeklyAvgTime : monthlyAvgTime}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <select 
-                    value={avgTimeFilter} 
-                    onChange={(e) => setAvgTimeFilter(e.target.value)}
-                    className="w-full bg-[#0F051D] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="today">Bugün</option>
-                    <option value="week">Bu Hafta</option>
-                    <option value="month">Bu Ay</option>
-                  </select>
-                </div>
-              </div>
               {/* 7th Block: Custom Date Range */}
               <div className="bg-[#1A0B2E] backdrop-blur p-6 rounded-2xl border border-white/10 shadow-sm flex flex-col gap-4">
                 <div className="flex items-center gap-4">

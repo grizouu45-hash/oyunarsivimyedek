@@ -41,6 +41,7 @@ export function StoreFront() {
   const [giveawayAnswer, setGiveawayAnswer] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [quotaError, setQuotaError] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category");
   const initialLoad = useRef(true);

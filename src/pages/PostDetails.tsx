@@ -15,6 +15,7 @@ export function PostDetails() {
   const location = useLocation();
   const [post, setPost] = useState<Game | null>((location.state?.game as Game) || null);
   const [loading, setLoading] = useState(true);
+  const [quotaError, setQuotaError] = useState(false);
   const [userRating, setUserRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
 
@@ -95,8 +96,11 @@ export function PostDetails() {
             }
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching post:", error);
+        if (error.code === 'resource-exhausted') {
+          setQuotaError(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -111,6 +115,23 @@ export function PostDetails() {
         <Header />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (quotaError) {
+    return (
+      <div className="min-h-screen bg-[#0F051D] transition-colors duration-300 relative text-white">
+        <title>Sistem Yoğunluğu | OYUNARŞİVİM.com</title>
+        <Header />
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
+          <h2 className="text-2xl font-bold text-white mb-4">Sistem Şu An Yoğun</h2>
+          <p className="text-white/60 mb-8 max-w-md">Veritabanı kotası aşıldığı için şu an içeriğe ulaşılamıyor. Lütfen daha sonra tekrar deneyin.</p>
+          <Link to="/" className="text-indigo-400 hover:underline inline-flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Ana Sayfaya Dön
+          </Link>
         </div>
       </div>
     );
