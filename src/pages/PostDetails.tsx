@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { Game } from '../types';
@@ -12,7 +12,8 @@ import { AdSense } from '../components/AdSense';
 
 export function PostDetails() {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<Game | null>(null);
+  const location = useLocation();
+  const [post, setPost] = useState<Game | null>((location.state?.game as Game) || null);
   const [loading, setLoading] = useState(true);
   const [userRating, setUserRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
@@ -70,6 +71,13 @@ export function PostDetails() {
   useEffect(() => {
     async function fetchPost() {
       if (!id) return;
+      
+      // If we already have the post from state, we can stop loading immediately
+      // But we still might want to increment views and fetch latest data silently
+      if (post) {
+        setLoading(false);
+      }
+      
       try {
         const docRef = doc(db, 'games', id);
         const docSnap = await getDoc(docRef);

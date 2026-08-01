@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react';
+import re
+
+new_code = """import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { doc, setDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -94,3 +96,7 @@ export function PageTracker() {
 
   return null;
 }
+"""
+
+with open('src/components/PageTracker.tsx', 'w') as f:
+    f.write(new_code)

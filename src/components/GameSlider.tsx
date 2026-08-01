@@ -80,7 +80,7 @@ export function GameSlider({ games }: { games: Game[] }) {
                     {game.description}
                   </p>
                   <div className="flex space-x-4 items-center pt-2">
-                    <Link to={`/post/${game.id}`}>
+                    <Link to={`/post/${game.id}`} state={{ game }}>
                       <motion.button 
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}

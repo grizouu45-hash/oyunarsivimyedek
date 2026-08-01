@@ -17,7 +17,7 @@ export const GameCard: React.FC<{ game: Game }> = ({ game }) => {
   const ratingCount = ratingValues.length;
 
   return (
-    <Link to={`/post/${game.id}`}>
+    <Link to={`/post/${game.id}`} state={{ game }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
