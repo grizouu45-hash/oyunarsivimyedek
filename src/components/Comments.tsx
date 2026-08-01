@@ -37,6 +37,8 @@ export function Comments({ postId }: { postId: string }) {
         ...doc.data()
       })) as Comment[];
       setComments(commentsData);
+    }, (error: any) => {
+      console.error("Comments error", error);
     });
 
     return () => unsubscribe();

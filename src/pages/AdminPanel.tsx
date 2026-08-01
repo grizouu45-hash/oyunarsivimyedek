@@ -341,7 +341,7 @@ export function AdminPanel() {
         ...doc.data(),
       })) as Product[];
       setProducts(pData);
-    });
+    }, (error: any) => console.error("Admin Products error", error));
 
     return () => {
       unsubscribe();

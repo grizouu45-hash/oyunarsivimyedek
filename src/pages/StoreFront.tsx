@@ -114,6 +114,8 @@ export function StoreFront() {
       })) as WeeklyQuestion[];
       const activeQ = qsData.find((q) => q.active);
       setActiveQuestion(activeQ || null);
+    }, (error: any) => {
+      console.error("Questions error", error);
     });
 
     const qGiveaways = query(
@@ -127,6 +129,8 @@ export function StoreFront() {
       })) as Giveaway[];
       const activeG = gData.find((g) => g.active);
       setActiveGiveaway(activeG || null);
+    }, (error: any) => {
+      console.error("Giveaways error", error);
     });
 
     const qProducts = query(
@@ -140,6 +144,8 @@ export function StoreFront() {
       })) as Product[];
       const activeProducts = pData.filter(p => p.active);
       setProducts(activeProducts);
+    }, (error: any) => {
+      console.error("Products error", error);
     });
 
     return () => {
