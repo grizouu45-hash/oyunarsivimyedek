@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react';
+import re
+
+new_code = """import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { doc, setDoc, increment, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -40,43 +42,26 @@ export function PageTracker() {
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     
+    // Only start reporting duration after 15 seconds to avoid bouncing sessions dragging down the average
     const startSessionTracking = () => {
       let isFirstReport = true;
       intervalId = setInterval(async () => {
         try {
-          const today = new Date();
-          const dayStr = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-          const monthStr = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
+          const avgRef = doc(db, 'site_stats', 'global_metrics');
           
-          const d = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
-          const dayNum = d.getUTCDay() || 7;
-          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-          const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-          const weekStr = `${d.getUTCFullYear()}-W${weekNo}`;
-
-          const refs = [
-            doc(db, 'site_stats', 'global_metrics'),
-            doc(db, 'site_stats', `daily_${dayStr}`),
-            doc(db, 'site_stats', weekStr),
-            doc(db, 'site_stats', `monthly_${monthStr}`)
-          ];
-
-          for (const ref of refs) {
-             if (isFirstReport) {
-                await setDoc(ref, { totalDuration: increment(15), totalSessions: increment(1) }, { merge: true });
-             } else {
-                await setDoc(ref, { totalDuration: increment(15) }, { merge: true });
-             }
-             
-             const docSnap = await getDoc(ref);
-             if (docSnap.exists()) {
-                const data = docSnap.data();
-                const avg = Math.floor((data.totalDuration || 0) / (data.totalSessions || 1));
-                await setDoc(ref, { averageSessionDuration: avg }, { merge: true });
-             }
+          if (isFirstReport) {
+             await setDoc(avgRef, { totalDuration: increment(15), totalSessions: increment(1) }, { merge: true });
+             isFirstReport = false;
+          } else {
+             await setDoc(avgRef, { totalDuration: increment(15) }, { merge: true });
           }
-          if (isFirstReport) isFirstReport = false;
+          
+          const docSnap = await getDoc(avgRef);
+          if (docSnap.exists()) {
+             const d = docSnap.data();
+             const avg = Math.floor((d.totalDuration || 0) / (d.totalSessions || 1));
+             await setDoc(avgRef, { averageSessionDuration: avg }, { merge: true });
+          }
         } catch (e) {
            // ignore
         }
@@ -95,3 +80,7 @@ export function PageTracker() {
 
   return null;
 }
+"""
+
+with open('src/components/PageTracker.tsx', 'w') as f:
+    f.write(new_code)

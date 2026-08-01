@@ -1,0 +1,5 @@
+                                        <option value="">Seçiniz</option>
+                    {categories.map((cat, idx) => (
+                      <option key={idx} value={cat}>{cat}</option>
+                    ))}
+</div>

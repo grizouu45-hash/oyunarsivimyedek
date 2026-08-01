@@ -45,6 +45,9 @@ export function AdminPanel() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
 
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>(["DLS FORMALARI", "DLS 19 MODLARI", "PSP PES SERİSİ", "FTS MODLARI", "DİĞER OYUNLAR", "BİLGİLENDİRMELER"]);
+  const [newCategory, setNewCategory] = useState("");
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<WeeklyQuestion | null>(
     null,
@@ -777,6 +780,13 @@ export function AdminPanel() {
               <span className="hidden sm:inline">Çöp Kutusu</span>
             </button>
             <button
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Kategori Yönet</span>
+            </button>
+            <button
               onClick={handleOpenBloggerModal}
               className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium transition-colors shadow-sm"
             >
@@ -1156,11 +1166,93 @@ export function AdminPanel() {
         )}
           </>
         )}
-      </main>
+      
+      <AnimatePresence>
+        {isCategoryModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsCategoryModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#1A0B2E] border border-white/10 rounded-2xl w-full max-w-md relative z-10 overflow-hidden shadow-2xl"
+            >
+              <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white">Kategorileri Yönet</h2>
+                <button 
+                  onClick={() => setIsCategoryModalOpen(false)}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="flex gap-2 mb-6">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="flex-1 bg-[#0F051D] border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-purple-500"
+                    placeholder="Yeni kategori adı"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!newCategory.trim()) return;
+                      const catName = newCategory.trim().toUpperCase();
+                      if (categories.includes(catName)) return;
+                      const updated = [...categories, catName];
+                      setCategories(updated);
+                      setNewCategory('');
+                      const { doc, setDoc } = await import('firebase/firestore');
+                      const { db } = await import('../lib/firebase');
+                      await setDoc(doc(db, 'site_settings', 'categories'), { list: updated }, { merge: true });
+                    }}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-colors"
+                  >
+                    Ekle
+                  </button>
+                </div>
+                
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                  {categories.map((cat, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-[#0F051D] border border-white/5 p-3 rounded-xl">
+                      <span className="text-white font-medium">{cat}</span>
+                      <button
+                        onClick={async () => {
+                          const updated = categories.filter(c => c !== cat);
+                          setCategories(updated);
+                          const { doc, setDoc } = await import('firebase/firestore');
+                          const { db } = await import('../lib/firebase');
+                          await setDoc(doc(db, 'site_settings', 'categories'), { list: updated }, { merge: true });
+                        }}
+                        className="text-red-400 hover:text-red-300 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {categories.length === 0 && (
+                     <div className="text-center text-white/50 text-sm py-4">Henüz kategori eklenmedi.</div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+</main>
 
       <AnimatePresence>
+
+
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1209,13 +1301,10 @@ export function AdminPanel() {
                     }
                     className="w-full bg-white dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white"
                   >
-                    <option value="">Seçiniz</option>
-                    <option value="DLS FORMALARI">DLS FORMALARI</option>
-                    <option value="DLS 19 MODLARI">DLS 19 MODLARI</option>
-                    <option value="PSP PES SERİSİ">PSP PES SERİSİ</option>
-                    <option value="FTS MODLARI">FTS MODLARI</option>
-                    <option value="DİĞER OYUNLAR">DİĞER OYUNLAR</option>
-                    <option value="BİLGİLENDİRMELER">BİLGİLENDİRMELER</option>
+                                        <option value="">Seçiniz</option>
+                    {categories.map((cat, idx) => (
+                      <option key={idx} value={cat}>{cat}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -1443,7 +1532,7 @@ export function AdminPanel() {
 
       <AnimatePresence>
         {isQuestionModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1638,7 +1727,7 @@ export function AdminPanel() {
 
       <AnimatePresence>
         {isGiveawayModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1758,7 +1847,7 @@ export function AdminPanel() {
 
       <AnimatePresence>
         {viewingGiveaway && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1813,7 +1902,7 @@ export function AdminPanel() {
 
       <AnimatePresence>
         {isProductModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1984,7 +2073,7 @@ export function AdminPanel() {
 
       <AnimatePresence>
         {isBloggerModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -2087,7 +2176,7 @@ export function AdminPanel() {
       </AnimatePresence>
       <AnimatePresence>
         {isTrashModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-purple-900/20 dark:bg-black/50 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
