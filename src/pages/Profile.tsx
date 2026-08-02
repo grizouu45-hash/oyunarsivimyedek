@@ -54,7 +54,7 @@ export function Profile() {
 
       setUserComments(comments);
     } catch (error) {
-      console.error("Error fetching user comments:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error fetching user comments:", error); }
     } finally {
       setFetchingComments(false);
     }
@@ -81,7 +81,7 @@ export function Profile() {
       window.location.reload();
       
     } catch (error: any) {
-      console.error("Error updating profile:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error updating profile:", error); }
       alert('Profil güncellenirken bir hata oluştu: ' + error.message);
     } finally {
       setLoading(false);

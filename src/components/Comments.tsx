@@ -38,7 +38,7 @@ export function Comments({ postId }: { postId: string }) {
       })) as Comment[];
       setComments(commentsData);
     }, (error: any) => {
-      console.error("Comments error", error);
+      if (error?.code !== "resource-exhausted") { console.error("Comments error", error); }
     });
 
     return () => unsubscribe();
@@ -79,7 +79,7 @@ export function Comments({ postId }: { postId: string }) {
       
       setNewComment('');
     } catch (error) {
-      console.error("Error adding comment:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error adding comment:", error); }
     }
   };
 
@@ -121,7 +121,7 @@ export function Comments({ postId }: { postId: string }) {
       setReplyText('');
       setReplyTo(null);
     } catch (error) {
-      console.error("Error adding reply:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error adding reply:", error); }
     }
   };
 
@@ -161,7 +161,7 @@ export function Comments({ postId }: { postId: string }) {
         }
       }
     } catch (error) {
-      console.error("Error liking comment:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error liking comment:", error); }
     }
   };
 
@@ -169,7 +169,7 @@ export function Comments({ postId }: { postId: string }) {
     try {
       await deleteDoc(doc(db, 'comments', commentId));
     } catch (error: any) {
-      console.error("Error deleting comment:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error deleting comment:", error); }
     }
   };
 

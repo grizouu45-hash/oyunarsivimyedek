@@ -38,7 +38,7 @@ export function Login() {
 
           await setDoc(userRef, userData, { merge: true });
         } catch (e) {
-          console.error('Error saving user to firestore:', e);
+          if (e?.code !== "resource-exhausted") { console.error('Error saving user to firestore:', e); }
         }
       }
 

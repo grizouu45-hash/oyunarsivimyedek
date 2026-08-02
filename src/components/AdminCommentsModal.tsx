@@ -47,7 +47,7 @@ export function AdminCommentsModal({ isOpen, onClose }: AdminCommentsModalProps)
               postTitles[data.postId] = 'Bilinmeyen Haber';
             }
           } catch (e) {
-            console.error("Error fetching post title", e);
+            if (e?.code !== "resource-exhausted") { console.error("Error fetching post title", e); }
             postTitles[data.postId] = 'Haber Bulunamadı';
           }
         }
@@ -60,7 +60,7 @@ export function AdminCommentsModal({ isOpen, onClose }: AdminCommentsModalProps)
       }
       setComments(commentsData);
     } catch (e) {
-      console.error("Error fetching comments", e);
+      if (e?.code !== "resource-exhausted") { console.error("Error fetching comments", e); }
     } finally {
       setLoading(false);
     }
@@ -108,7 +108,7 @@ export function AdminCommentsModal({ isOpen, onClose }: AdminCommentsModalProps)
       // Optional: Refetch comments or just show a success message
       fetchComments();
     } catch (e) {
-      console.error("Error sending reply", e);
+      if (e?.code !== "resource-exhausted") { console.error("Error sending reply", e); }
     } finally {
       setSubmittingReply(false);
     }
@@ -119,7 +119,7 @@ export function AdminCommentsModal({ isOpen, onClose }: AdminCommentsModalProps)
       await deleteDoc(doc(db, 'comments', commentId));
       setComments(comments.filter(c => c.id !== commentId));
     } catch (error: any) {
-      console.error("Error deleting comment:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error deleting comment:", error); }
     }
   };
 
@@ -162,7 +162,7 @@ export function AdminCommentsModal({ isOpen, onClose }: AdminCommentsModalProps)
         }
       }
     } catch (error) {
-      console.error("Error liking comment:", error);
+      if (error?.code !== "resource-exhausted") { console.error("Error liking comment:", error); }
     }
   };
 

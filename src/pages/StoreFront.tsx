@@ -12,10 +12,10 @@ import {
   increment
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
-import { Game, WeeklyQuestion, Giveaway, Product } from "../types";
+import { Game } from "../types";
 import { Header } from "../components/Header";
 import { GameSlider } from "../components/GameSlider";
-import { ProductSlider } from "../components/ProductSlider";
+
 import { GameCard } from "../components/GameCard";
 import { NotificationPrompt } from "../components/NotificationPrompt";
 import { AdSense } from "../components/AdSense";
@@ -25,10 +25,8 @@ import { motion } from "motion/react";
 
 export function StoreFront() {
   const [games, setGames] = useState<Game[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [activeQuestion, setActiveQuestion] = useState<WeeklyQuestion | null>(
-    null,
-  );
+  
+  
 
   useEffect(() => {
     document.title = 'OYUNARŞİVİM.com | Mobil Futbol Arşivim';
@@ -37,8 +35,8 @@ export function StoreFront() {
       metaDesc.setAttribute('content', 'Mobil futbol oyunları ile ilgili güncel mod ve yamaları ücretsiz olarak sitemizden indirebilirsiniz!');
     }
   }, []);
-  const [activeGiveaway, setActiveGiveaway] = useState<Giveaway | null>(null);
-  const [giveawayAnswer, setGiveawayAnswer] = useState("");
+  
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [quotaError, setQuotaError] = useState(false);
@@ -97,63 +95,24 @@ export function StoreFront() {
           }
         });
       },
-      (error) => {
-        console.error("Error fetching games:", error);
+      (error: any) => {
+        if (error?.code !== "resource-exhausted") { console.error("Error fetching games:", error); }
+        if (error.code === 'resource-exhausted') {
+          setQuotaError(true);
+        }
         setLoading(false);
       },
     );
 
-    const qQuestions = query(
-      collection(db, "weeklyQuestions"),
-      orderBy("createdAt", "desc"),
-    );
-    const unsubscribeQuestions = onSnapshot(qQuestions, (snapshot) => {
-      const qsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as WeeklyQuestion[];
-      const activeQ = qsData.find((q) => q.active);
-      setActiveQuestion(activeQ || null);
-    }, (error: any) => {
-      console.error("Questions error", error);
-    });
+    
 
-    const qGiveaways = query(
-      collection(db, "giveaways"),
-      orderBy("createdAt", "desc"),
-    );
-    const unsubscribeGiveaways = onSnapshot(qGiveaways, (snapshot) => {
-      const gData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Giveaway[];
-      const activeG = gData.find((g) => g.active);
-      setActiveGiveaway(activeG || null);
-    }, (error: any) => {
-      console.error("Giveaways error", error);
-    });
+    
 
-    const qProducts = query(
-      collection(db, "products"),
-      orderBy("createdAt", "desc"),
-    );
-    const unsubscribeProducts = onSnapshot(qProducts, (snapshot) => {
-      const pData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Product[];
-      const activeProducts = pData.filter(p => p.active);
-      setProducts(activeProducts);
-    }, (error: any) => {
-      console.error("Products error", error);
-    });
+    
 
     return () => {
       unsubscribe();
-      unsubscribeQuestions();
-      unsubscribeGiveaways();
-      unsubscribeProducts();
-    };
+      };
   }, []);
 
   const categories = [
@@ -177,79 +136,7 @@ export function StoreFront() {
 
   const featuredGames = games.slice(0, 3);
 
-  const handleVote = async (optionIndex: number) => {
-    if (!auth.currentUser) {
-      return;
-    }
-    if (!activeQuestion || !activeQuestion.id) return;
-
-    try {
-      const questionRef = doc(db, "weeklyQuestions", activeQuestion.id);
-      await updateDoc(questionRef, {
-        [`votes.${auth.currentUser.uid}`]: optionIndex,
-      });
-    } catch (error: any) {
-      console.error("Error voting:", error.message);
-    }
-  };
-
-  const getVotePercentages = () => {
-    if (!activeQuestion || !activeQuestion.votes) return [0, 0, 0, 0];
-    const totalVotes = Object.keys(activeQuestion.votes).length;
-    if (totalVotes === 0) return [0, 0, 0, 0];
-
-    const counts = [0, 0, 0, 0];
-    Object.values(activeQuestion.votes).forEach((voteIndex: unknown) => {
-      const idx =
-        typeof voteIndex === "number"
-          ? voteIndex
-          : parseInt(String(voteIndex), 10);
-      if (counts[idx] !== undefined) {
-        counts[idx]++;
-      }
-    });
-
-    return counts.map((count) => Math.round((count / totalVotes) * 100));
-  };
-
-  const percentages = getVotePercentages();
-  const totalVotesCount = activeQuestion?.votes
-    ? Object.keys(activeQuestion.votes).length
-    : 0;
-  const userVoteIndex =
-    auth.currentUser &&
-    activeQuestion?.votes &&
-    activeQuestion.votes[auth.currentUser.uid] !== undefined
-      ? activeQuestion.votes[auth.currentUser.uid]
-      : -1;
-
-  const userParticipatedGiveaway =
-    auth.currentUser &&
-    activeGiveaway?.participants &&
-    activeGiveaway.participants[auth.currentUser.uid];
-
-  const handleGiveawaySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!auth.currentUser) {
-      return;
-    }
-    if (!activeGiveaway || !activeGiveaway.id || !giveawayAnswer.trim()) return;
-
-    try {
-      const giveawayRef = doc(db, "giveaways", activeGiveaway.id);
-      await updateDoc(giveawayRef, {
-        [`participants.${auth.currentUser.uid}`]: {
-          userId: auth.currentUser.uid,
-          userName: auth.currentUser.displayName || "İsimsiz",
-          answer: giveawayAnswer.trim(),
-          createdAt: serverTimestamp(),
-        },
-      });
-      setGiveawayAnswer("");
-    } catch (error: any) {
-      console.error("Error joining giveaway:", error.message);
-    }
-  };
+  
 
   const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
   const paginatedGames = filteredGames.slice(
@@ -292,20 +179,6 @@ export function StoreFront() {
                     <GameSlider games={featuredGames} />
                   </div>
                   <div className="w-full xl:w-[320px] 2xl:w-[350px] flex-shrink-0 flex flex-col gap-4">
-                    <ProductSlider products={[
-                      {
-                        id: "static-1",
-                        title: "DLS Oyun Rehberi",
-                        description: "Dream League Soccer'da Bilinmeyen Püf Noktalar & Taktikler",
-                        price: "10 TL",
-                        badge: "Dijital Ürün",
-                        imageUrl: "https://i.ibb.co/QvWjtX4g/YARIMVOLE-375e0bbcfceaf9ebffb1e493b728eb7e.png",
-                        link: "https://www.shopier.com/YARIMVOLE/48501113",
-                        active: true,
-                        createdAt: new Date()
-                      },
-                      ...products
-                    ]} />
                     
                     <a
                       href="https://donate.bynogame.com/yarimvolee"
@@ -454,185 +327,10 @@ export function StoreFront() {
                     </div>
                   </div>
 
-                  {/* Çekiliş */}
-                  {activeGiveaway && (
-                    <div className="mb-12">
-                    <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-6 flex items-center gap-2">
-                        <Gift className="w-6 h-6 text-indigo-400" />
-                        Çekiliş: {activeGiveaway.title}
-                      </h3>
-                      <div className="bg-[#1A0B2E] backdrop-blur-xl rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-white/10">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 opacity-20 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
-
-                        <div className="relative z-10">
-                          <div className="flex flex-wrap gap-4 mb-6">
-                            <div className="bg-[#1A0B2E] rounded-xl px-4 py-3 border border-white/10 flex-1 min-w-[140px]">
-                              <span className="text-white/60 text-xs sm:text-sm font-medium uppercase tracking-wider block mb-1">Katılımcı Sayısı</span>
-                              <span className="font-bold text-xl sm:text-2xl text-white">
-                                {activeGiveaway.participants ? Object.keys(activeGiveaway.participants).length : 0} Kişi
-                              </span>
-                            </div>
-                            {activeGiveaway.endDate && (
-                              <div className="bg-[#1A0B2E] rounded-xl px-4 py-3 border border-white/10 flex-1 min-w-[140px]">
-                                <span className="text-white/60 text-xs sm:text-sm font-medium uppercase tracking-wider block mb-1">Bitiş Tarihi</span>
-                                <span className="font-bold text-xl sm:text-2xl text-white">
-                                  {new Date(activeGiveaway.endDate).toLocaleDateString('tr-TR')}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          <h4 className="text-lg font-semibold mb-4 text-indigo-200">
-                            Katılım Şartları / Açıklama
-                          </h4>
-                          <p className="text-white/80 whitespace-pre-wrap mb-8 text-sm sm:text-base">
-                            {activeGiveaway.conditions}
-                          </p>
-
-                          {userParticipatedGiveaway ? (
-                            <div className="bg-green-500/20 border border-green-500/50 rounded-xl p-4 text-center">
-                              <p className="text-green-300 font-medium">
-                                Bu çekilişe katıldınız. Bol şans!
-                              </p>
-                            </div>
-                          ) : (
-                            <form
-                              onSubmit={handleGiveawaySubmit}
-                              className="space-y-4 max-w-xl"
-                            >
-                              <textarea
-                                value={giveawayAnswer}
-                                onChange={(e) => setGiveawayAnswer(e.target.value)}
-                                placeholder="Cevabınızı buraya yazın..."
-                                className="w-full bg-[#1A0B2E] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400 min-h-[100px] resize-y"
-                                required
-                              />
-                              <button
-                                type="submit"
-                            disabled={!giveawayAnswer.trim()}
-                            className="px-6 py-3 bg-white text-black font-bold rounded-xl shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90"
-                          >
-                            Çekilişe Katıl
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
                 </>
               )}
 
-              {/* Haftanın Sorusu */}
-              {activeQuestion && (
-                <div className="mb-12">
-                    <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-6">
-                    {activeQuestion.type === "quiz"
-                      ? "Günün Sorusu"
-                      : "Haftanın Anketi"}
-                  </h3>
-                  <div className="bg-[#1A0B2E] backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 opacity-20 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500 opacity-10 rounded-full blur-xl transform -translate-x-1/2 translate-y-1/2"></div>
-
-                    <div className="relative z-10 flex flex-col items-center text-center w-full">
-                      <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 border border-white/30 backdrop-blur-sm">
-                        Sizce?
-                      </span>
-                      <p className="text-xl sm:text-2xl font-medium leading-relaxed max-w-3xl mb-8">
-                        "{activeQuestion.question}"
-                      </p>
-
-                      {activeQuestion.options &&
-                        activeQuestion.options.length > 0 && (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
-                            {activeQuestion.options.map((option, idx) => {
-                              if (!option.trim()) return null;
-                              const isVoted = userVoteIndex === idx;
-                              const hasUserVoted = userVoteIndex !== -1;
-                              const percentage = hasUserVoted
-                                ? percentages[idx]
-                                : 0;
-
-                              let buttonStyle = `bg-white/10 hover:bg-white/20 border-white/20`;
-
-                              if (hasUserVoted) {
-                                if (activeQuestion.type === "quiz") {
-                                  if (
-                                    idx === activeQuestion.correctOptionIndex
-                                  ) {
-                                    buttonStyle = `bg-green-500/40 border-green-400 ring-2 ring-green-400/50`;
-                                  } else if (isVoted) {
-                                    buttonStyle = `bg-red-500/40 border-red-400 ring-2 ring-red-400/50`;
-                                  }
-                                } else {
-                                  if (isVoted) {
-                                    buttonStyle = `bg-white/30 border-white/50 ring-2 ring-white/50`;
-                                  }
-                                }
-                              }
-
-                              return (
-                                <button
-                                  key={idx}
-                                  onClick={() => handleVote(idx)}
-                                  disabled={!auth.currentUser || hasUserVoted}
-                                  className={`relative overflow-hidden border transition-all duration-300 py-4 px-6 rounded-xl font-medium text-white shadow-sm text-left flex justify-between items-center group
-                                  ${buttonStyle}
-                                  ${!auth.currentUser || hasUserVoted ? "opacity-90 cursor-default hover:-translate-y-0" : "hover:-translate-y-0.5"}
-                                `}
-                                >
-                                  {hasUserVoted && (
-                                    <div
-                                      className="absolute left-0 top-0 bottom-0 bg-white/20 transition-all duration-1000 ease-out"
-                                      style={{ width: `${percentage}%` }}
-                                    />
-                                  )}
-                                  <span className="relative z-10 flex-1">
-                                    {option}
-                                  </span>
-                                  {hasUserVoted && (
-                                    <span className="relative z-10 font-bold ml-4">
-                                      {percentage}%
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      {totalVotesCount > 0 && userVoteIndex !== -1 && (
-                        <div className="mt-6 flex flex-col items-center gap-2">
-                          <p className="text-sm text-white/80 font-medium bg-black/20 px-4 py-1.5 rounded-full">
-                            Toplam {totalVotesCount} oy kullanıldı.
-                          </p>
-                          {activeQuestion.type === "quiz" && (
-                            <p
-                              className={`text-sm font-bold px-4 py-1.5 rounded-full mt-2
-                              ${
-                                userVoteIndex ===
-                                activeQuestion.correctOptionIndex
-                                  ? "bg-green-500/20 text-green-100 border border-green-500/30"
-                                  : "bg-red-500/20 text-red-100 border border-red-500/30"
-                              }`}
-                            >
-                              {userVoteIndex ===
-                              activeQuestion.correctOptionIndex
-                                ? "🎉 Tebrikler, doğru bildiniz!"
-                                : "❌ Yanlış cevap."}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                      {!auth.currentUser && (
-                        <p className="mt-6 text-sm text-white/70">
-                          Oy kullanmak için giriş yapmalısınız.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Kategoriler */}
 
               {/* Kategoriler */}
               <div className="mt-auto pt-8 border-t border-white/10">

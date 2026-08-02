@@ -46,7 +46,7 @@ export function NotificationsCenter({ user }: { user: User }) {
       });
       
       setNotifications(notifsData);
-    });
+    }, (error: any) => { if (error?.code !== "resource-exhausted") { console.error("Notifications error", error) } });
 
     return () => unsubscribe();
   }, [user, isAdmin]);
@@ -80,7 +80,7 @@ export function NotificationsCenter({ user }: { user: User }) {
         });
       }
     } catch (error) {
-      console.error('Error marking as read', error);
+      if (error?.code !== "resource-exhausted") { console.error('Error marking as read', error); }
     }
   };
 

@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getDoc, query, where, orderBy, enableIndexedDbPersistence } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getDoc, query, where, orderBy, enableIndexedDbPersistence, setLogLevel } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+
+// Log seviyesini sessize alarak quota exceeded hatalarının konsola düşmesini engelliyoruz
+setLogLevel('silent');
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyB7sENsFn0XiRWnl1ddxwHO09iI1YxDvzM",
@@ -24,6 +27,7 @@ enableIndexedDbPersistence(db).catch((err) => {
     console.warn("The current browser does not support all of the features required to enable persistence");
   }
 });
+
 const auth = getAuth(app);
 const storage = getStorage(app);
 

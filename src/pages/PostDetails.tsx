@@ -35,7 +35,7 @@ export function PostDetails() {
       });
       setPost(prev => prev ? { ...prev, ratings: { ...prev.ratings, [uid]: rating } } : null);
     } catch (e) {
-      console.error("Error updating rating:", e);
+      if (e?.code !== "resource-exhausted") { console.error("Error updating rating:", e); }
     }
   };
 
@@ -48,7 +48,7 @@ export function PostDetails() {
           url: window.location.href,
         });
       } catch (error) {
-        console.error('Error sharing:', error);
+        if (error?.code !== "resource-exhausted") { console.error('Error sharing:', error); }
       }
     } else {
       // Fallback: copy to clipboard
@@ -92,12 +92,12 @@ export function PostDetails() {
               await updateDoc(docRef, { views: increment(1) });
               sessionStorage.setItem(sessionKey, 'true');
             } catch (e) {
-              console.error("Error incrementing views:", e);
+              if (e?.code !== "resource-exhausted") { console.error("Error incrementing views:", e); }
             }
           }
         }
       } catch (error: any) {
-        console.error("Error fetching post:", error);
+        if (error?.code !== "resource-exhausted") { console.error("Error fetching post:", error); }
         if (error.code === 'resource-exhausted') {
           setQuotaError(true);
         }
