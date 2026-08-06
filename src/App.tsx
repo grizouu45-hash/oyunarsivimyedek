@@ -15,11 +15,13 @@ import { TermsOfService } from './pages/TermsOfService';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { PageTracker } from './components/PageTracker';
 import { Profile } from './pages/Profile';
+import { CookieConsent } from './components/CookieConsent';
 
 export default function App() {
   return (
     <BrowserRouter>
       <PageTracker />
+      <CookieConsent />
       <Routes>
         <Route path="/" element={<StoreFront />} />
         <Route path="/admin" element={<AdminPanel />} />
